@@ -1,0 +1,2 @@
+# Allow the interactive user and coding agent to manage this container.
+pi ALL=(ALL:ALL) NOPASSWD: ALL

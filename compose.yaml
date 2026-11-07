@@ -1,0 +1,43 @@
+services:
+  gateway:
+    build: ./gateway
+    cap_add:
+      - NET_ADMIN
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - pi-net
+    healthcheck:
+      test: ["CMD", "test", "-f", "/run/firewall-ready"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+    restart: "no"
+
+  pi:
+    build:
+      context: ./pi
+      args:
+        PI_UID: ${PI_UID:-1000}
+        PI_GID: ${PI_GID:-1000}
+    network_mode: "service:gateway"
+    depends_on:
+      gateway:
+        condition: service_healthy
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=512m
+    stdin_open: true
+    tty: true
+    volumes:
+      - type: bind
+        source: ${PI_WORKSPACE:?Set PI_WORKSPACE to the absolute path of your repository}
+        target: /workspace
+      - pi-config:/home/pi/.pi
+    working_dir: /workspace
+
+networks:
+  pi-net:
+    driver: bridge
+
+volumes:
+  pi-config:

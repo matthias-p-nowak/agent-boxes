@@ -1,0 +1,20 @@
+{
+  "lastChangelogVersion": "1.5.2",
+  "packages": [
+    "npm:pi-llama-cpp"
+  ],
+  "llamaSettings": {
+    "servers": [
+      {
+        "url": "http://192.168.0.17:9931",
+        "name": "xen"
+      },
+      {
+        "url": "http://192.168.0.32:9931",
+        "name": "agx"
+      }
+    ],
+    "reactToModelSelect": true,
+    "autoloadOnMessage": true
+  }
+}

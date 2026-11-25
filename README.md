@@ -9,9 +9,10 @@ changes are ephemeral and disappear when the container is removed.
 
 ## Run on Linux (from the repository you want Pi to edit)
 
-`run-pi.sh` sets `PI_UID`/`PI_GID` to the caller's IDs, mounts `$PWD` (or
-`$PI_WORKSPACE`) as `/workspace`, rebuilds the images if needed, and starts an
-interactive Pi container:
+`run-pi.sh` sets `PI_UID`/`PI_GID` to the caller's IDs, mounts the canonical
+`$PWD` (or `$PI_WORKSPACE`) as `/workspace`, and opens a shell in that
+workspace's persistent Pi container. Repeated launches reuse the same
+container; a different workspace gets a different container:
 
 ```sh
 /absolute/path/to/agent-boxes/run-pi.sh
@@ -22,13 +23,6 @@ absolute target; the script resolves the link back to the repository:
 
 ```sh
 ln -s /absolute/path/to/agent-boxes/run-pi.sh ~/bin/run-pi
-```
-
-Manual equivalent:
-
-```sh
-export PI_WORKSPACE="$PWD" PI_UID="$(id -u)" PI_GID="$(id -g)"
-docker compose -f /absolute/path/to/agent-boxes/compose.yaml run --build --rm pi
 ```
 
 ## Run on Windows PowerShell (from the repository you want Pi to edit)
@@ -42,8 +36,8 @@ The bind mount uses `${PI_WORKSPACE:?}` so Compose fails instead of silently mou
 
 ## Network policy
 
-- TCP port 9931 and TCP destination ports above 15000 are allowed to **any** IP
-  in `192.168.0.0/16`.
+- TCP ports 5555 (ADB) and 9931, plus TCP destination ports above 15000, are
+  allowed to **any** IP in `192.168.0.0/16`.
 - All other traffic to `10.0.0.0/8`, `169.254.0.0/16`,
   `172.16.0.0/12`, and `192.168.0.0/16` is blocked.
 - Other IPv4 destinations, including public internet, are allowed.

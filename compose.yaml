@@ -7,6 +7,8 @@ services:
       - no-new-privileges:true
     networks:
       - pi-net
+    ports:
+      - "8080:8080"
     healthcheck:
       test: ["CMD", "test", "-f", "/run/firewall-ready"]
       interval: 2s
@@ -25,14 +27,30 @@ services:
       gateway:
         condition: service_healthy
     tmpfs:
-      - /tmp:rw,nosuid,nodev,size=512m
+      - /tmp:rw,nosuid,nodev,size=4096m
     stdin_open: true
     tty: true
+    environment:
+      # Selects the host X server exposed through the socket bind below.
+      DISPLAY: ${DISPLAY:-:0}
+      # Gives X11 clients the cookie mounted from the host below.
+      XAUTHORITY: /home/pi/.Xauthority
     volumes:
       - type: bind
-        source: ${PI_WORKSPACE:?Set PI_WORKSPACE to the absolute path of your repository}
+        # Defaults to the directory the command is run from.
+        source: ${PI_WORKSPACE:-${PWD}}
         target: /workspace
-      - pi-config:/home/pi/.pi
+      - type: volume
+        source: pi-cache
+        target: /cache
+      - type: bind
+        source: /tmp/.X11-unix
+        target: /tmp/.X11-unix
+      - type: bind
+        source: ${XAUTHORITY:-${HOME}/.Xauthority}
+        target: /home/pi/.Xauthority
+        read_only: true
+      - /prjs/teamwork:/teamwork:ro
     working_dir: /workspace
 
 networks:
@@ -40,4 +58,4 @@ networks:
     driver: bridge
 
 volumes:
-  pi-config:
+  pi-cache:
